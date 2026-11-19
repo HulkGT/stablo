@@ -5,7 +5,7 @@
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
 var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48;
+var CFG=window.CFG||{}, LABEL=48, VER='1.3';
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -468,6 +468,7 @@ function askFilter(){
 function help(){
   var m=$('modal');
   m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>Kako dopuniti stablo</h4>'+
+    '<p class="hint"><b>Verzija '+VER+'</b> · širina zaslona '+vw()+' px · zum '+Math.round(z*100)+'%</p>'+
     '<p class="hint">Dodirni bilo koju osobu. Otvori se njezin listić s gumbima: <b>Dodaj partnera</b>, <b>Dodaj dijete</b>, <b>Dodaj roditelja</b> i <b>Uredi</b>.</p>'+
     '<p class="hint">Dovoljno je ime. Godine, bilješka i fotografija mogu doći kasnije — fotografiju slikaš mobitelom ili biraš iz galerije.</p>'+
     '<p class="hint">Sve što upišeš vide i svi ostali. Ako nemaš internet, sprema se na mobitel i šalje se samo kad se vratiš na mrežu.</p>'+
