@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#E7DAC0">
+<title>Rodoslov Jozić — Čalušić</title>
+<meta name="description" content="Obiteljsko stablo Jozić i Čalušić. Svatko može dopuniti svoju granu: nove osobe, godine i fotografije.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rodoslov">
+<meta property="og:title" content="Rodoslov Jozić — Čalušić">
+<meta property="og:description" content="Naše obiteljsko stablo. Otvori, pogledaj i dopuni svoju granu — nove osobe, godine i fotografije.">
+<meta property="og:url" content="https://hulkgt.github.io/stablo/">
+<meta property="og:image" content="https://hulkgt.github.io/stablo/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="hr_HR">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <b>Rodoslov</b>
+    <small id="count">&nbsp;</small>
+  </div>
+  <div class="tools">
+    <button class="ic" id="zout" aria-label="Smanji">&minus;</button>
+    <button class="ic" id="zfit" aria-label="Cijelo stablo">⤢</button>
+    <button class="ic" id="zin" aria-label="Povećaj">+</button>
+    <button class="ic" id="help" aria-label="Pomoć">?</button>
+  </div>
+</header>
+
+<div class="sync" id="sync" hidden></div>
+
+<div class="viewport" id="viewport">
+  <div class="canvas" id="canvas">
+    <div class="stage" id="stage"><svg class="wires" id="wires" aria-hidden="true"></svg></div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden></div>
+<div class="modal" id="modal" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<div class="wel" id="wel" hidden></div>
+
+<script src="config.js"></script>
+<script src="seed.js"></script>
+<script src="tree.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});</script>
+</body>
+</html>
