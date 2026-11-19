@@ -5,7 +5,7 @@
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
 var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48, VER='1.4';
+var CFG=window.CFG||{}, LABEL=48, VER='1.5';
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -78,6 +78,7 @@ async function pull(force){
 async function push(){
   if(!on() || busy) return;
   var q=jget(LQ,[]); if(!q.length) return;
+  var sending=q.length;                       // sve što stigne u međuvremenu ostaje u redu
   busy=true;
   try{
     var r=await api('?id=eq.1&select=data,updated_at',{headers:head()});
@@ -94,8 +95,12 @@ async function push(){
     });
     var res=await u.json();
     if(!res||!res.length){ busy=false; return setTimeout(push,1500); }   // netko je bio brži
-    state=res[0].data; stamp=res[0].updated_at; jset(LQ,[]); saveLocal(); render();
+    var rest=jget(LQ,[]).slice(sending);
+    state=res[0].data; stamp=res[0].updated_at;
+    rest.forEach(function(op){ applyOp(state,op) });
+    jset(LQ,rest); saveLocal(); render();
     setSync('Spremljeno za sve',true);
+    if(rest.length){ busy=false; return push() }
   }catch(e){
     setSync('Nema veze — spremljeno na mobitelu, poslat ću kasnije');
   }
@@ -389,7 +394,9 @@ function addParent(id){
     else{ var cid='c'+uid(); doOp({t:'c',c:{id:cid,a:np.id,b:null}}); doOp({t:'p',p:{id:id,pc:cid}},'Dodano'); }
   });
 }
+var editing=null;
 function editPerson(id){
+  editing=id;
   var p=L.P[id];
   form('Uredi osobu',p,'',function(v){
     if(!v.n) return toast('Ime ne smije biti prazno');
@@ -558,7 +565,19 @@ $('modal').addEventListener('click',function(e){
   if(a==='rmph'){ pendingPhotos.splice(+b.dataset.i,1); $('f_phs').innerHTML=photoStrip(); return }
   if(a==='save'){ var v=readForm(), f=m._save; if(f){ var r=f(v); if(r!==false) closeForm(); } return }
   if(a==='del'){
-    if(confirm('Obrisati ovu osobu iz stabla?')){ doOp({t:'d',id:sel},'Obrisano'); closeForm(); }
+    var who=editing||sel; if(!who) return;
+    var nm=L.P[who]?nameOf(L.P[who]):'';
+    m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div>'+
+      '<h4>Obrisati '+esc(nm)+'?</h4>'+
+      '<p class="hint">Osoba nestaje iz stabla kod svih. Veze prema djeci ostaju prazne.</p>'+
+      '<div class="acts"><button class="btn primary full" data-a="delyes">Da, obriši</button>'+
+      '<button class="btn quiet full" data-a="cancel">Ne</button></div>';
+    return;
+  }
+  if(a==='delyes'){
+    var w2=editing||sel; editing=null;
+    if(w2) doOp({t:'d',id:w2},'Obrisano');
+    closeForm(); return;
   }
 });
 document.addEventListener('change',function(e){
