@@ -137,10 +137,10 @@ function card(p,x,y){
   b.style.left=Math.round(x*z)+'px'; b.style.top=Math.round(y*z)+'px';
   b.style.width=C+'px';
   var src=photoSrc(p);
-  var fs=Math.max(8,Math.round(11.5*z)), fy=Math.max(8,Math.round(10.5*z));
+  var fs=Math.max(9,Math.round(11.5*z)), fy=Math.max(8,Math.round(10*z));
   b.innerHTML='<span class="fr" style="width:'+C+'px;height:'+C+'px">'+
     (src?'<img src="'+esc(src)+'" alt="">':'<span class="mono" style="font-size:'+Math.round(C*0.26)+'px">'+esc(initials(p.n))+'</span>')+'</span>'+
-    '<span class="nm" style="font-size:'+fs+'px;width:'+Math.round(C*1.2)+'px">'+esc(nameOf(p))+'</span>'+
+    '<span class="nm" style="font-size:'+fs+'px;width:'+Math.round(C*1.06)+'px">'+esc(nameOf(p))+'</span>'+
     '<span class="yr" style="font-size:'+fy+'px">'+esc(life(p))+'</span>';
   return b;
 }
