@@ -223,7 +223,11 @@ function start(){                                              // čitljiv poče
 }
 
 /* Listić/obrazac prate vidljivi dio zaslona, i kad je stranica raširena prstima */
-function syncOverlay(){
+function syncOverlay(){                       // prozori su preko cijelog zaslona, ništa se ne pomiče
+  ['sheet','modal','toast'].forEach(function(id){
+    var el=$(id); if(el&&id!=='toast'){ el.style.transform=''; el.style.width='' }
+  });
+  if(true) return;
   var v=window.visualViewport; if(!v) return;
   var ch=document.documentElement.clientHeight||window.innerHeight;
   var cw=document.documentElement.clientWidth||window.innerWidth;
@@ -258,7 +262,7 @@ function openSheet(id){
   var yb=Home.year(p.b), yd=Home.year(p.d);
   var age=(yb&&yd)?('  ·  '+(yd-yb)+' g.'):'';
   var datum=Home.fmt(p.b)+(p.d?' – '+Home.fmt(p.d):(p.b?' –':''));
-  s.innerHTML='<div class="grip"></div><div class="sh">'+
+  s.innerHTML='<div class="grip"><button class="close" data-a="close" aria-label="Zatvori">&times;</button></div><div class="sh">'+
     '<span class="fr">'+(main?'<img src="'+esc(main)+'" alt="">':'<span class="mono">'+esc(initials(p.n))+'</span>')+'</span>'+
     '<div><h3>'+esc(nameOf(p))+'</h3><div class="meta">'+esc(datum||'godine nepoznate')+esc(age)+'</div></div></div>'+
     (ph.length>1?'<div class="gal">'+ph.map(function(x){return '<img src="'+esc(x)+'" alt="">'}).join('')+'</div>':'')+
@@ -303,7 +307,7 @@ function photoStrip(){
 function form(title,person,hint,onSave,extra){
   pendingPhotos=person?photos(person).slice(0,3):[];
   var m=$('modal');
-  m.innerHTML='<div class="grip"></div><h4>'+esc(title)+'</h4>'+
+  m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>'+esc(title)+'</h4>'+
     (hint?'<p class="hint">'+esc(hint)+'</p>':'')+
     '<label>Ime i prezime<input type="text" id="f_n" value="'+esc(person?person.n:'')+'" autocomplete="off"></label>'+
     '<label>Djevojačko prezime <span class="opt">ako se mijenjalo</span>'+
@@ -438,7 +442,7 @@ function renderHome(){
 }
 function askName(first){
   var m=$('modal');
-  m.innerHTML='<div class="grip"></div><h4>Kako se zoveš?</h4>'+
+  m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>Kako se zoveš?</h4>'+
     '<p class="hint">Samo ime, bez lozinke. Tako ostali vide tko je koga upisao. Možeš i preskočiti.</p>'+
     '<label>Tvoje ime<input type="text" id="f_me" value="'+esc(ME||'')+'" autocomplete="given-name"></label>'+
     '<div class="acts"><button class="btn primary full" data-a="saveme">Spremi</button>'+
@@ -449,7 +453,7 @@ function askName(first){
 function askFilter(){
   var all=Home.surnames(state.people), cur=filterSet();
   var m=$('modal');
-  m.innerHTML='<div class="grip"></div><h4>Čije rođendane želiš vidjeti</h4>'+
+  m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>Čije rođendane želiš vidjeti</h4>'+
     '<p class="hint">Bez odabira vidiš sve. Odaberi prezimena koja te zanimaju — vrijedi samo za ovaj mobitel.</p>'+
     '<div class="who pick">'+all.map(function(x){
       var on=cur&&cur.indexOf(x)>=0;
@@ -463,7 +467,7 @@ function askFilter(){
 /* ---------- pomoć ---------- */
 function help(){
   var m=$('modal');
-  m.innerHTML='<div class="grip"></div><h4>Kako dopuniti stablo</h4>'+
+  m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>Kako dopuniti stablo</h4>'+
     '<p class="hint">Dodirni bilo koju osobu. Otvori se njezin listić s gumbima: <b>Dodaj partnera</b>, <b>Dodaj dijete</b>, <b>Dodaj roditelja</b> i <b>Uredi</b>.</p>'+
     '<p class="hint">Dovoljno je ime. Godine, bilješka i fotografija mogu doći kasnije — fotografiju slikaš mobitelom ili biraš iz galerije.</p>'+
     '<p class="hint">Sve što upišeš vide i svi ostali. Ako nemaš internet, sprema se na mobitel i šalje se samo kad se vratiš na mrežu.</p>'+

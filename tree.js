@@ -9,7 +9,7 @@ function build(data){
   var people = data.people || [], couples = data.couples || [];
   var P = {}, C = {};
   people.forEach(function(p){ P[p.id] = p; });
-  couples.forEach(function(c){ if(P[c.a] && P[c.b]) C[c.id] = c; });
+  couples.forEach(function(c){ if(P[c.a] || P[c.b]) C[c.id] = c; });   // dopušten je i par bez druge osobe
 
   // Kinder je Paar
   var kids = {};
@@ -24,9 +24,11 @@ function build(data){
   var unitOf = {}, units = [];
   Object.keys(C).forEach(function(cid){
     var c = C[cid];
-    if(unitOf[c.a] || unitOf[c.b]) return;          // Mehrfachehe: nur die erste im Bild
-    var u = {id:'u_'+cid, cid:cid, m:[c.a, c.b]};
-    units.push(u); unitOf[c.a] = u; unitOf[c.b] = u;
+    var mem = [c.a, c.b].filter(function(x){ return x && P[x] });
+    if(!mem.length) return;
+    if(mem.some(function(x){ return unitOf[x] })) return;   // Mehrfachehe: nur die erste im Bild
+    var u = {id:'u_'+cid, cid:cid, m:mem};
+    units.push(u); mem.forEach(function(x){ unitOf[x] = u });
   });
   people.forEach(function(p){
     if(unitOf[p.id]) return;
@@ -40,7 +42,10 @@ function build(data){
     u.par = [];
     u.m.forEach(function(pid){
       var pc = P[pid].pc;
-      if(pc && C[pc]){ var pu = unitOf[C[pc].a] || unitOf[C[pc].b]; if(pu && u.par.indexOf(pu)<0) u.par.push(pu); }
+      if(pc && C[pc]){
+        var pu = unitOf[C[pc].a] || unitOf[C[pc].b];
+        if(pu && u.par.indexOf(pu)<0) u.par.push(pu);
+      }
     });
     u.kids = [];
   });
@@ -59,7 +64,11 @@ function build(data){
     var moved = false;
     people.forEach(function(p){
       if(p.pc && C[p.pc]){
-        var g = Math.max(gen[C[p.pc].a], gen[C[p.pc].b]) + 1;
+        var pa=C[p.pc], ga=[];
+        if(pa.a && gen[pa.a]!=null) ga.push(gen[pa.a]);
+        if(pa.b && gen[pa.b]!=null) ga.push(gen[pa.b]);
+        if(!ga.length) return;
+        var g = Math.max.apply(null, ga) + 1;
         if(g > gen[p.id]){ gen[p.id] = g; moved = true; }
       }
     });

@@ -30,7 +30,7 @@ button{font:inherit;color:inherit}
 .sync.ok{background:#2f6b4f}
 
 /* Stammbaum */
-.wrap{padding:calc(70px + env(safe-area-inset-top)) 16px 90px;display:block}
+.wrap{padding:calc(66px + env(safe-area-inset-top)) 16px 24px;display:block}
 .stage{position:relative;margin:0 auto}
 .wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 
@@ -48,11 +48,17 @@ button{font:inherit;color:inherit}
 .p.new .fr{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--seal),0 6px 16px rgba(31,44,51,.2)}
 
 /* Listić i obrasci */
-.sheet,.modal{position:fixed;left:0;right:0;bottom:0;z-index:40;background:linear-gradient(180deg,#F3E9D3,#E7DAC0);
-  border-top:1px solid rgba(31,44,51,.35);box-shadow:0 -14px 40px rgba(31,44,51,.25);
-  padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto}
+.sheet,.modal{position:fixed;inset:0;z-index:40;overflow:auto;-webkit-overflow-scrolling:touch;
+  background:linear-gradient(180deg,#F3E9D3 0%,#E7DAC0 42%);
+  padding:calc(14px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-left,0px))
+          calc(28px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right,0px))}
+.sheet>*,.modal>*{max-width:520px;margin-left:auto;margin-right:auto}
 .modal{z-index:50}
-.grip{width:44px;height:4px;border-radius:3px;background:rgba(31,44,51,.25);margin:0 auto 14px}
+.grip{position:sticky;top:0}
+.grip{display:flex;align-items:center;justify-content:flex-end;margin:0 0 10px;background:none;
+  width:auto;height:auto;border-radius:0}
+.grip .close{width:44px;height:44px;border-radius:12px;border:1px solid rgba(31,44,51,.25);
+  background:var(--wash);font-size:20px;line-height:1;color:var(--ink)}
 .sh{display:flex;gap:14px;align-items:center}
 .sh .fr{width:84px;height:84px;flex:0 0 84px}
 .sh h3{font-family:var(--serif);margin:0;font-size:1.3rem;line-height:1.2}
@@ -96,9 +102,7 @@ h4{font-family:var(--serif);font-size:1.2rem;margin:4px 0 0}
 @keyframes bob{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(8px);opacity:1}}
 @media (prefers-reduced-motion:reduce){.welar{animation:none}}
 
-@media (min-width:760px){
-  .sheet,.modal{left:50%;transform:translateX(-50%);width:520px;border-radius:18px 18px 0 0}
-}
+
 
 /* ---------- početni zaslon (Korijeni) ---------- */
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
