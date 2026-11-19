@@ -1,5 +1,5 @@
-const VERSION='rodoslov-1.0.1';
-const SHELL=['./','index.html','style.css','app.js','tree.js','seed.js','config.js',
+const VERSION='korijeni-1.1.0';
+const SHELL=['./','index.html','style.css','app.js','tree.js','home.js','seed.js','config.js',
   'manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 self.addEventListener('install',e=>{
   self.skipWaiting();

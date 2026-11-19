@@ -99,3 +99,55 @@ h4{font-family:var(--serif);font-size:1.2rem;margin:4px 0 0}
 @media (min-width:760px){
   .sheet,.modal{left:50%;transform:translateX(-50%);width:520px;border-radius:18px 18px 0 0}
 }
+
+/* ---------- početni zaslon (Korijeni) ---------- */
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.grp{display:flex;gap:6px}
+.home{padding:calc(70px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-left,0px))
+      calc(40px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right,0px));
+      max-width:520px;margin:0 auto}
+.home .big{background:linear-gradient(180deg,#F3E9D3,#EBDFC5);border:1px solid rgba(156,122,60,.45);
+  border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center}
+.home .big .fr{width:84px;height:84px;flex:0 0 84px;border-radius:14px}
+.home .big .s{color:var(--seal);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.home .big .n{font-family:var(--serif);font-size:1.45rem;line-height:1.15;margin-top:2px}
+.home .big .d{color:var(--ink2);font-size:.92rem;margin-top:3px}
+.home .big.empty{justify-content:center;text-align:center}
+.cta{display:block;width:100%;margin-top:14px;padding:18px;border:0;border-radius:16px;
+  background:linear-gradient(120deg,var(--seal),#b5492c);color:#fff;font-weight:700;font-size:1.08rem;
+  box-shadow:0 10px 24px rgba(153,55,32,.25)}
+.statline{text-align:center;color:var(--ink2);font-size:.85rem;margin-top:10px}
+.sec{display:flex;align-items:center;gap:10px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--brass);margin:24px 0 10px}
+.lnk{margin-left:auto;border:0;background:none;color:var(--ink2);font-size:.78rem;text-decoration:underline;
+  letter-spacing:.04em;text-transform:none}
+.rowlist{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:11px;width:100%;padding:9px;border-radius:14px;
+  background:var(--wash);border:1px solid rgba(156,122,60,.28);text-align:left}
+.row img{width:40px;height:40px;border-radius:11px;object-fit:cover;border:1px solid rgba(31,44,51,.3)}
+.rmono{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--paper2);
+  color:var(--brass);font-family:var(--serif);font-size:15px}
+.row .nm{font-weight:600;font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .dt{margin-left:auto;color:var(--ink2);font-size:.85rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.who{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:.86rem;padding:8px 12px;border-radius:999px;background:var(--wash);
+  border:1px solid rgba(156,122,60,.3);color:var(--ink)}
+.chip.me{border-color:var(--seal);color:var(--seal);font-weight:600}
+.chip.on{background:var(--seal);color:#fff;border-color:transparent}
+.chip.add{border-style:dashed;color:var(--ink2)}
+.who.pick{margin-top:4px}
+.soft{color:var(--ink2)}
+.small{font-size:.85rem}
+
+/* obrazac: datum i fotografije */
+.row3{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;margin-top:5px}
+.opt{color:var(--ink2);font-weight:400;font-size:.82em}
+.phs{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.ph{position:relative;width:76px;height:76px;border-radius:12px;overflow:hidden;
+  border:1px solid rgba(31,44,51,.35);background:var(--paper2);display:block;padding:0}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .x{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;border:0;
+  background:rgba(31,44,51,.75);color:#fff;font-size:14px;line-height:1}
+.ph.add{display:grid;place-items:center;font-size:26px;color:var(--brass);border-style:dashed}
+.gal{display:flex;gap:8px;margin-top:12px}
+.gal img{width:72px;height:72px;border-radius:12px;object-fit:cover;border:1px solid rgba(31,44,51,.3)}

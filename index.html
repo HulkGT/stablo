@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#E7DAC0">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>Rodoslov Jozić — Čalušić</title>
+<title>Korijeni</title>
 <meta name="description" content="Obiteljsko stablo Jozić i Čalušić. Svatko može dopuniti svoju granu: nove osobe, godine i fotografije.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Rodoslov">
-<meta property="og:title" content="Rodoslov Jozić — Čalušić">
+<meta property="og:site_name" content="Korijeni">
+<meta property="og:title" content="Korijeni — naše obiteljsko stablo">
 <meta property="og:description" content="Naše obiteljsko stablo. Otvori, pogledaj i dopuni svoju granu — nove osobe, godine i fotografije.">
 <meta property="og:url" content="https://hulkgt.github.io/stablo/">
 <meta property="og:image" content="https://hulkgt.github.io/stablo/preview.png">
@@ -26,20 +26,24 @@
 
 <header class="bar">
   <div class="brand">
-    <b>Rodoslov</b>
-    <small id="count">&nbsp;</small>
+    <button class="ic" id="back" aria-label="Natrag" hidden>&#8592;</button>
+    <span><b>Korijeni</b><small id="count" hidden>&nbsp;</small></span>
   </div>
   <div class="tools">
-    <button class="ic" id="zout" aria-label="Smanji">&minus;</button>
-    <button class="ic" id="zfit" aria-label="Cijelo stablo">⤢</button>
-    <button class="ic" id="zin" aria-label="Povećaj">+</button>
+    <span id="treetools" class="grp" hidden>
+      <button class="ic" id="zout" aria-label="Smanji">&minus;</button>
+      <button class="ic" id="zfit" aria-label="Cijelo stablo">⤢</button>
+      <button class="ic" id="zin" aria-label="Povećaj">+</button>
+    </span>
     <button class="ic" id="help" aria-label="Pomoć">?</button>
   </div>
 </header>
 
 <div class="sync" id="sync" hidden></div>
 
-<main class="wrap">
+<section class="home" id="home"></section>
+
+<main class="wrap" id="treeview" hidden>
   <div class="stage" id="stage"><svg class="wires" id="wires" aria-hidden="true"></svg></div>
 </main>
 
@@ -51,6 +55,7 @@
 <script src="config.js"></script>
 <script src="seed.js"></script>
 <script src="tree.js"></script>
+<script src="home.js"></script>
 <script src="app.js"></script>
 <script>if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});</script>
 </body>
