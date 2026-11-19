@@ -181,16 +181,32 @@ function render(){
 
 /* ---------- zum ---------- */
 function apply(){ render() }
-function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); render() }
+function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); try{ localStorage.setItem('rodoslov.zoom',z) }catch(e){} render() }
 function vw(){ return window.innerWidth || document.documentElement.clientWidth || 360 }
 function fit(){ setZ(Math.min(1.1,(vw()-24)/(L.width+40))) }   // cijelo stablo odjednom
 function start(){                                              // čitljiv početak
-  setZ(Math.max(.72, Math.min(1, vw()/620)));
+  var saved=null; try{ saved=parseFloat(localStorage.getItem('rodoslov.zoom'))||null }catch(e){}
+  setZ(saved || Math.max(.46, Math.min(1, vw()/700)));
   setTimeout(function(){
     var el=document.scrollingElement||document.documentElement;
     el.scrollLeft=Math.max(0,(stage.offsetWidth-vw())/2);
     el.scrollTop=0;
   },0);
+}
+
+/* Listić/obrazac prate vidljivi dio zaslona, i kad je stranica raširena prstima */
+function syncOverlay(){
+  var v=window.visualViewport; if(!v) return;
+  var dx=Math.round(v.offsetLeft), dy=Math.round(v.offsetTop+v.height-document.documentElement.clientHeight);
+  ['sheet','modal','toast'].forEach(function(id){
+    var el=$(id); if(!el||el.hidden) return;
+    el.style.transform='translate('+dx+'px,'+dy+'px)'+(id==='toast'?' translateX(-50%)':'');
+    if(id!=='toast') el.style.width=Math.round(v.width)+'px';
+  });
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',syncOverlay);
+  window.visualViewport.addEventListener('scroll',syncOverlay);
 }
 
 /* ---------- listić o osobi ---------- */
@@ -219,7 +235,7 @@ function openSheet(id){
       '<button class="btn" data-a="edit">Uredi</button>'+
       '<button class="btn quiet full" data-a="close">Zatvori</button>'+
     '</div>';
-  s.hidden=false;
+  s.hidden=false; syncOverlay();
 }
 function closeSheet(){ $('sheet').hidden=true; sel=null }
 
@@ -240,7 +256,7 @@ function form(title,person,hint,onSave,extra){
     '<div class="acts"><button class="btn primary full" data-a="save">Spremi</button>'+
     (extra||'')+
     '<button class="btn quiet full" data-a="cancel">Odustani</button></div>';
-  m.hidden=false;
+  m.hidden=false; syncOverlay();
   m._save=onSave;
   setTimeout(function(){ var e=$('f_n'); if(e&&!person) e.focus() },120);
 }
@@ -318,7 +334,7 @@ function help(){
 
 /* ---------- poruke ---------- */
 var tt;
-function toast(msg){ var t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(tt); tt=setTimeout(function(){t.hidden=true},2600) }
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.hidden=false; syncOverlay(); clearTimeout(tt); tt=setTimeout(function(){t.hidden=true},2600) }
 
 /* ---------- instalacija ---------- */
 var INSTALL=null;
