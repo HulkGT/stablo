@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Prüfseite</title>
+<style>
+  body{margin:0;background:#E7DAC0;color:#1F2C33;font:16px system-ui,sans-serif}
+  .box{width:200px;height:200px;background:#993720;color:#fff;display:grid;place-items:center;
+       font-size:28px;font-weight:700;margin:16px}
+  .klein{width:52px;height:52px;background:#1F2C33;margin:16px}
+  h1{font-size:30px;margin:16px}
+  pre{white-space:pre-wrap;word-break:break-all;font-size:15px;line-height:1.5;margin:16px;
+      background:#fff8e8;padding:12px;border:1px solid #9C7A3C}
+  img{width:120px;height:120px;object-fit:cover;margin:16px;border:2px solid #1F2C33}
+</style>
+</head>
+<body>
+<h1>Prüfseite</h1>
+<div class="box">GROSS</div>
+<p style="margin:16px">Der schwarze Kasten unten ist so groß wie eine Person im Stammbaum:</p>
+<div class="klein"></div>
+<p style="margin:16px">Foto aus dem Stammbaum:</p>
+<img src="photos/denis_jozic.jpg" alt="Foto" id="foto">
+<pre id="info">…</pre>
+<script>
+var v = window.visualViewport || {};
+var t = [
+  'innerWidth: '      + window.innerWidth,
+  'outerWidth: '      + window.outerWidth,
+  'screen.width: '    + screen.width,
+  'devicePixelRatio: '+ window.devicePixelRatio,
+  'visualViewport: '  + (v.width||'-') + ' / Zoom ' + (v.scale||'-'),
+  'documentElement: ' + document.documentElement.clientWidth,
+  'standalone: '      + (matchMedia('(display-mode: standalone)').matches || navigator.standalone===true),
+  'Schriftzoom: '     + (function(){var d=document.createElement('div');d.style.cssText='width:100px;font-size:16px';
+                          document.body.appendChild(d);var w=d.offsetWidth;d.remove();return w})(),
+  'UA: '              + navigator.userAgent
+];
+document.getElementById('foto').onerror=function(){ t.push('FOTO LÄDT NICHT'); document.getElementById('info').textContent=t.join('\n') };
+document.getElementById('foto').onload =function(){ t.push('Foto geladen: '+this.naturalWidth+'px'); document.getElementById('info').textContent=t.join('\n') };
+document.getElementById('info').textContent=t.join('\n');
+</script>
+</body>
+</html>

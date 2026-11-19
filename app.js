@@ -185,7 +185,7 @@ function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); render() }
 function vw(){ return window.innerWidth || document.documentElement.clientWidth || 360 }
 function fit(){ setZ(Math.min(1.1,(vw()-24)/(L.width+40))) }   // cijelo stablo odjednom
 function start(){                                              // čitljiv početak
-  setZ(Math.max(.5, Math.min(1, vw()/780)));
+  setZ(Math.max(.72, Math.min(1, vw()/620)));
   setTimeout(function(){
     var el=document.scrollingElement||document.documentElement;
     el.scrollLeft=Math.max(0,(stage.offsetWidth-vw())/2);
