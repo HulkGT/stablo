@@ -163,6 +163,7 @@ function render(){
   wires.innerHTML='';
   var W=Math.round((L.width+2)*z), H=Math.round((L.height+LABEL+10)*z);
   stage.style.width=W+'px'; stage.style.height=H+'px';
+  stage.style.margin = (W > vw()-32) ? '0' : '0 auto';
   wires.setAttribute('viewBox','0 0 '+W+' '+H);
   wires.setAttribute('width',W); wires.setAttribute('height',H);
 
@@ -191,14 +192,29 @@ function render(){
 var zoomByUser=false;
 function apply(){ render() }
 function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); try{ if(zoomByUser) localStorage.setItem('korijeni.zoom',z) }catch(e){} render() }
-function vw(){ return window.innerWidth || document.documentElement.clientWidth || 360 }
+function vw(){                                   // najmanja stvarna širina: neki preglednici lažu
+  var a=[window.innerWidth, document.documentElement.clientWidth];
+  if(window.visualViewport) a.push(window.visualViewport.width);
+  if(window.screen&&screen.width) a.push(screen.width);
+  a=a.filter(function(x){ return x>200 });
+  return a.length?Math.round(Math.min.apply(null,a)):360;
+}
+function vhh(){
+  var a=[window.innerHeight, document.documentElement.clientHeight];
+  if(window.visualViewport) a.push(window.visualViewport.height);
+  a=a.filter(function(x){ return x>200 });
+  return a.length?Math.round(Math.min.apply(null,a)):640;
+}
 function fit(){                                   // cijelo stablo stane na zaslon
-  var h=(window.innerHeight||640)-150;
-  setZ(Math.min(1.1,(vw()-24)/(L.width+40), h/(L.height+90)));
+  setZ(Math.min(1.1,(vw()-24)/(L.width+40), (vhh()-150)/(L.height+90)));
+}
+function startZoom(){                             // čitljivo, ali ne šire nego što treba
+  var f=Math.min(1.1,(vw()-24)/(L.width+40), (vhh()-150)/(L.height+90));
+  return Math.max(.38, f);
 }
 function start(){                                              // čitljiv početak
   var saved=null; try{ saved=parseFloat(localStorage.getItem('korijeni.zoom'))||null }catch(e){}
-  if(saved) setZ(saved); else fit();
+  if(saved) setZ(saved); else setZ(startZoom());
   setTimeout(function(){
     var el=document.scrollingElement||document.documentElement;
     el.scrollLeft=Math.max(0,(stage.offsetWidth-vw())/2);
