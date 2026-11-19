@@ -155,3 +155,8 @@ h4{font-family:var(--serif);font-size:1.2rem;margin:4px 0 0}
 .ph.add{display:grid;place-items:center;font-size:26px;color:var(--brass);border-style:dashed}
 .gal{display:flex;gap:8px;margin-top:12px}
 .gal img{width:72px;height:72px;border-radius:12px;object-fit:cover;border:1px solid rgba(31,44,51,.3)}
+
+/* Beziehungen im Personenfenster */
+.rel{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0 0;font-size:.95rem;line-height:1.4}
+.rel dt{color:var(--brass);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;padding-top:3px;white-space:nowrap}
+.rel dd{margin:0}

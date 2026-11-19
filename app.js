@@ -5,7 +5,7 @@
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
 var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48, VER='1.3';
+var CFG=window.CFG||{}, LABEL=48, VER='1.4';
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -246,14 +246,23 @@ if(window.visualViewport){
 
 /* ---------- listić o osobi ---------- */
 function rel(id){
-  var p=L.P[id], out=[];
+  var p=L.P[id], rows=[];
   var cs=state.couples.filter(function(c){return c.a===id||c.b===id});
-  cs.forEach(function(c){ var o=c.a===id?c.b:c.a; if(o&&L.P[o]) out.push('u paru s '+nameOf(L.P[o])) });
-  if(p.pc&&L.C[p.pc]){ var c=L.C[p.pc]; out.push('dijete: '+[c.a,c.b].filter(Boolean).map(function(x){return L.P[x]?L.P[x].n:''}).filter(Boolean).join(' i ')) }
+  var par=[];
+  cs.forEach(function(c){ var o=c.a===id?c.b:c.a; if(o&&L.P[o]) par.push(nameOf(L.P[o])) });
+  if(par.length) rows.push(['Partner', par.join(', ')]);
+  if(p.pc&&L.C[p.pc]){
+    var c=L.C[p.pc];
+    var rod=[c.a,c.b].filter(Boolean).map(function(x){ return L.P[x]?nameOf(L.P[x]):'' }).filter(Boolean);
+    if(rod.length) rows.push([rod.length>1?'Roditelji':'Roditelj', rod.join(' i ')]);
+  }
   var kids=[];
-  cs.forEach(function(c){ (L.kids[c.id]||[]).forEach(function(k){ kids.push(L.P[k].n) }) });
-  if(kids.length) out.push((kids.length===1?'dijete: ':'djeca: ')+kids.join(', '));
-  return out.join(' · ');
+  cs.forEach(function(c){ (L.kids[c.id]||[]).forEach(function(k){ kids.push(nameOf(L.P[k])) }) });
+  if(kids.length) rows.push([kids.length>1?'Djeca':'Dijete', kids.join(', ')]);
+  if(!rows.length) return '';
+  return '<dl class="rel">'+rows.map(function(r){
+    return '<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>';
+  }).join('')+'</dl>';
 }
 function openSheet(id){
   if($('treeview').hidden) go('stablo');
@@ -267,7 +276,7 @@ function openSheet(id){
     '<div><h3>'+esc(nameOf(p))+'</h3><div class="meta">'+esc(datum||'godine nepoznate')+esc(age)+'</div></div></div>'+
     (ph.length>1?'<div class="gal">'+ph.map(function(x){return '<img src="'+esc(x)+'" alt="">'}).join('')+'</div>':'')+
     (p.nt?'<p class="note">'+esc(p.nt)+'</p>':'')+
-    '<p class="note soft">'+esc(rel(id))+'</p>'+
+    rel(id)+
     (p.by?'<p class="note soft small">upisao/la '+esc(p.by)+'</p>':'')+
     '<div class="acts">'+
       '<button class="btn" data-a="partner">Dodaj partnera</button>'+
