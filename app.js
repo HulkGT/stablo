@@ -225,11 +225,14 @@ function start(){                                              // čitljiv poče
 /* Listić/obrazac prate vidljivi dio zaslona, i kad je stranica raširena prstima */
 function syncOverlay(){
   var v=window.visualViewport; if(!v) return;
-  var dx=Math.round(v.offsetLeft), dy=Math.round(v.offsetTop+v.height-document.documentElement.clientHeight);
+  var ch=document.documentElement.clientHeight||window.innerHeight;
+  var cw=document.documentElement.clientWidth||window.innerWidth;
+  var dx=Math.round(Math.max(0,v.offsetLeft));
+  var dy=Math.min(0, Math.round(v.offsetTop+v.height-ch));   // samo prema gore (tipkovnica), nikad dolje
   ['sheet','modal','toast'].forEach(function(id){
     var el=$(id); if(!el||el.hidden) return;
     el.style.transform='translate('+dx+'px,'+dy+'px)'+(id==='toast'?' translateX(-50%)':'');
-    if(id!=='toast') el.style.width=Math.round(v.width)+'px';
+    if(id!=='toast') el.style.width=Math.round(Math.min(v.width,cw))+'px';
   });
 }
 if(window.visualViewport){
