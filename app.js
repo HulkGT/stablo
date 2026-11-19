@@ -182,8 +182,17 @@ function apply(){
   canvas.style.width=(parseFloat(stage.style.width)+48)*z+'px';
   canvas.style.height=(parseFloat(stage.style.height)+86)*z+'px';
 }
-function setZ(v){ z=Math.min(1.8,Math.max(.14,v)); apply() }
-function fit(){ setZ(Math.min(1.1,(viewport.clientWidth-16)/(L.width+48))) }
+function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); apply() }
+function vw(){ return viewport.clientWidth || window.innerWidth || 360 }
+function vh(){ return viewport.clientHeight || window.innerHeight || 640 }
+function fit(){ setZ(Math.min(1.1,(vw()-16)/(L.width+48))) }      // cijelo stablo odjednom
+function start(){                                                  // čitljiv početak: lica su dovoljno velika
+  setZ(Math.max(.5, Math.min(1, vw()/780)));
+  setTimeout(function(){
+    viewport.scrollLeft=Math.max(0,(parseFloat(canvas.style.width)-vw())/2);
+    viewport.scrollTop=0;
+  },0);
+}
 
 /* ---------- listić o osobi ---------- */
 function rel(id){
@@ -404,7 +413,8 @@ document.addEventListener('visibilitychange',function(){ if(!document.hidden){ p
   var saved=jget(LS,null);
   if(saved&&saved.doc&&saved.doc.people&&saved.doc.people.length){ state=saved.doc; stamp=saved.stamp||null }
   else { state=JSON.parse(JSON.stringify(window.SEED)); }
-  render(); fit();
+  render(); start();
+  setTimeout(function(){ if(!$('wel').hidden) return; toast('Povuci prstom za pomicanje · dodirni osobu za upis') },1400);
   if(!on()) setSync('Zajednički spremnik još nije postavljen — promjene ostaju na ovom mobitelu');
   pull(true).then(function(){ if(empty && state.people.length) return seedUp().then(push); push() });
   setInterval(function(){ if(!document.hidden) pull() },20000);
