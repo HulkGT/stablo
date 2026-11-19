@@ -379,11 +379,11 @@ function renderHome(){
   var h='';
   if(B.length){
     var n=B[0], src=photos(n.p)[0];
-    h+='<div class="big">'+
+    h+='<button class="big" data-h="osoba" data-id="'+n.p.id+'">'+
       '<span class="fr">'+(src?'<img src="'+esc(src)+'" alt="">':'<span class="mono">'+esc(initials(n.p.n))+'</span>')+'</span>'+
       '<div><span class="s">'+esc(Home.inDays(n.days))+'</span>'+
       '<div class="n">'+esc(nameOf(n.p))+'</div>'+
-      '<div class="d">puni '+n.turns+' · '+esc(Home.fmt(n.p.b))+'</div></div></div>';
+      '<div class="d">puni '+n.turns+' · '+esc(Home.fmt(n.p.b))+'</div></div></button>';
   } else {
     h+='<div class="big empty"><div><div class="n">Još nema rođendana</div>'+
        '<div class="d">Upiši dan i mjesec kod osoba i ovdje će se pojaviti.</div></div></div>';
