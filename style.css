@@ -6,7 +6,7 @@
   --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overscroll-behavior:none}
+html,body{margin:0;min-height:100%}
 body{
   background:radial-gradient(120% 80% at 50% 0%,#F0E5CF 0%,rgba(240,229,207,0) 55%),var(--paper);
   color:var(--ink);font-family:var(--sans);
@@ -29,22 +29,21 @@ button{font:inherit;color:inherit}
 .sync.ok{background:#2f6b4f}
 
 /* Stammbaum */
-.viewport{position:absolute;inset:0;padding-top:calc(58px + env(safe-area-inset-top));overflow:auto;-webkit-overflow-scrolling:touch}
-.canvas{margin:0 auto}
-.stage{position:relative;transform-origin:0 0;padding:26px 24px 60px;width:max-content}
-.wires{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.wrap{padding:calc(70px + env(safe-area-inset-top)) 16px 90px;display:block}
+.stage{position:relative;margin:0 auto}
+.wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 
-.p{position:absolute;width:var(--card);display:flex;flex-direction:column;align-items:center;gap:6px;
+.p{position:absolute;display:flex;flex-direction:column;align-items:center;gap:5px;
   background:none;border:0;padding:0;text-align:center}
-.fr{width:var(--card);height:var(--card);position:relative;overflow:hidden;background:var(--paper2);
+.fr{position:relative;overflow:hidden;background:var(--paper2);
   border:1px solid rgba(31,44,51,.5);box-shadow:0 0 0 3px var(--paper),0 0 0 4px rgba(156,122,60,.55),0 6px 16px rgba(31,44,51,.16)}
 .fr img{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(.16) saturate(.9)}
 .p.dead .fr img{filter:sepia(.32) saturate(.5)}
-.mono{width:100%;height:100%;display:grid;place-items:center;font-family:var(--serif);font-size:26px;color:var(--brass)}
+.mono{width:100%;height:100%;display:grid;place-items:center;font-family:var(--serif);color:var(--brass)}
 .mono::after{content:"";position:absolute;inset:11px;border:1px solid rgba(156,122,60,.42);
   clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-.nm{font-size:.72rem;font-weight:700;line-height:1.25;letter-spacing:.04em;text-transform:uppercase;width:124px}
-.yr{font-size:.68rem;color:var(--ink2);font-variant-numeric:tabular-nums}
+.nm{font-weight:700;line-height:1.2;letter-spacing:.03em;text-transform:uppercase}
+.yr{color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .p.new .fr{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--seal),0 6px 16px rgba(31,44,51,.2)}
 
 /* Listić i obrasci */

@@ -8,7 +8,7 @@ var CFG=window.CFG||{}, LABEL=48;
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
-var stage=$('stage'), wires=$('wires'), viewport=$('viewport'), canvas=$('canvas');
+var stage=$('stage'), wires=$('wires');
 
 /* ---------- pohrana na uređaju ---------- */
 function jget(k,f){ try{ var s=localStorage.getItem(k); return s?JSON.parse(s):f }catch(e){ return f } }
@@ -126,18 +126,22 @@ function card(p,x,y){
   var b=document.createElement('button');
   b.className='p'+(p.d?' dead':'')+((Date.now()-(fresh[p.id]||0)<90000)?' new':'');
   b.type='button'; b.dataset.id=p.id;
-  b.style.left=x+'px'; b.style.top=y+'px';
+  var C=Math.round(Tree.CARD*z);
+  b.style.left=Math.round(x*z)+'px'; b.style.top=Math.round(y*z)+'px';
+  b.style.width=C+'px';
   var src=photoSrc(p);
-  b.innerHTML='<span class="fr">'+(src?'<img src="'+esc(src)+'" alt="">':'<span class="mono">'+esc(initials(p.n))+'</span>')+'</span>'+
-    '<span class="nm">'+esc(p.n)+'</span><span class="yr">'+esc(life(p))+'</span>';
+  var fs=Math.max(8,Math.round(11.5*z)), fy=Math.max(8,Math.round(10.5*z));
+  b.innerHTML='<span class="fr" style="width:'+C+'px;height:'+C+'px">'+
+    (src?'<img src="'+esc(src)+'" alt="">':'<span class="mono" style="font-size:'+Math.round(C*0.26)+'px">'+esc(initials(p.n))+'</span>')+'</span>'+
+    '<span class="nm" style="font-size:'+fs+'px;width:'+Math.round(C*1.2)+'px">'+esc(p.n)+'</span>'+
+    '<span class="yr" style="font-size:'+fy+'px">'+esc(life(p))+'</span>';
   return b;
 }
 function wire(d,red){
   var e=document.createElementNS('http://www.w3.org/2000/svg','path');
   e.setAttribute('d',d); e.setAttribute('fill','none');
   e.setAttribute('stroke',red?'#993720':'#B09B74');
-  e.setAttribute('stroke-width',red?1.8:1.2);
-  e.setAttribute('vector-effect','non-scaling-stroke');
+  e.setAttribute('stroke-width',Math.max(1,(red?1.8:1.2)*z));
   wires.appendChild(e); return e;
 }
 function knot(x,y,r,red){
@@ -147,10 +151,10 @@ function knot(x,y,r,red){
 }
 function render(){
   L=Tree.build(state);
-  var C=L.CARD;
+  var C=L.CARD, Z=function(v){ return v*z };
   stage.querySelectorAll('.p').forEach(function(e){ e.remove() });
   wires.innerHTML='';
-  var W=L.width+2, H=L.height+LABEL+10;
+  var W=Math.round((L.width+2)*z), H=Math.round((L.height+LABEL+10)*z);
   stage.style.width=W+'px'; stage.style.height=H+'px';
   wires.setAttribute('viewBox','0 0 '+W+' '+H);
   wires.setAttribute('width',W); wires.setAttribute('height',H);
@@ -159,7 +163,7 @@ function render(){
     u.m.forEach(function(id){ stage.appendChild(card(L.P[id],u.pos[id],u.y)) });
     if(u.m.length===2){
       var x1=u.pos[u.m[0]]+C, x2=u.pos[u.m[1]], y=u.y+C/2;
-      wire('M'+(x1+4)+' '+y+'H'+(x2-4)); knot((x1+x2)/2,y,4.5);
+      wire('M'+Z(x1+4)+' '+Z(y)+'H'+Z(x2-4)); knot(Z((x1+x2)/2),Z(y),Math.max(2,4.5*z));
     }
     if(u.kids.length){
       var ox=u.x+u.w/2, oy=u.y+C+LABEL-6;
@@ -167,30 +171,25 @@ function render(){
       u.kids.forEach(function(k){
         var kx=k.m.length===2 ? (k.par.indexOf(u)>=0 ? k.pos[k.m[0]]+C/2 : k.x+k.w/2) : k.x+k.w/2;
         k.m.forEach(function(id){ if(L.P[id].pc && L.C[L.P[id].pc]===L.C[u.cid]) kx=k.pos[id]+C/2 });
-        wire('M'+ox+' '+oy+'V'+bus+'H'+kx+'V'+(k.y-5));
+        wire('M'+Z(ox)+' '+Z(oy)+'V'+Z(bus)+'H'+Z(kx)+'V'+Z(k.y-5));
       });
-      knot(ox,oy,3.5);
+      knot(Z(ox),Z(oy),Math.max(2,3.5*z));
     }
   });
   $('count').textContent=state.people.length+' osoba · '+L.gens+' koljena';
-  apply();
 }
 
 /* ---------- zum ---------- */
-function apply(){
-  stage.style.transform='scale('+z+')';
-  canvas.style.width=(parseFloat(stage.style.width)+48)*z+'px';
-  canvas.style.height=(parseFloat(stage.style.height)+86)*z+'px';
-}
-function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); apply() }
-function vw(){ return viewport.clientWidth || window.innerWidth || 360 }
-function vh(){ return viewport.clientHeight || window.innerHeight || 640 }
-function fit(){ setZ(Math.min(1.1,(vw()-16)/(L.width+48))) }      // cijelo stablo odjednom
-function start(){                                                  // čitljiv početak: lica su dovoljno velika
+function apply(){ render() }
+function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); render() }
+function vw(){ return window.innerWidth || document.documentElement.clientWidth || 360 }
+function fit(){ setZ(Math.min(1.1,(vw()-24)/(L.width+40))) }   // cijelo stablo odjednom
+function start(){                                              // čitljiv početak
   setZ(Math.max(.5, Math.min(1, vw()/780)));
   setTimeout(function(){
-    viewport.scrollLeft=Math.max(0,(parseFloat(canvas.style.width)-vw())/2);
-    viewport.scrollTop=0;
+    var el=document.scrollingElement||document.documentElement;
+    el.scrollLeft=Math.max(0,(stage.offsetWidth-vw())/2);
+    el.scrollTop=0;
   },0);
 }
 
