@@ -188,13 +188,17 @@ function render(){
 }
 
 /* ---------- zum ---------- */
+var zoomByUser=false;
 function apply(){ render() }
-function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); try{ localStorage.setItem('rodoslov.zoom',z) }catch(e){} render() }
+function setZ(v){ z=Math.min(1.8,Math.max(.22,v)); try{ if(zoomByUser) localStorage.setItem('korijeni.zoom',z) }catch(e){} render() }
 function vw(){ return window.innerWidth || document.documentElement.clientWidth || 360 }
-function fit(){ setZ(Math.min(1.1,(vw()-24)/(L.width+40))) }   // cijelo stablo odjednom
+function fit(){                                   // cijelo stablo stane na zaslon
+  var h=(window.innerHeight||640)-150;
+  setZ(Math.min(1.1,(vw()-24)/(L.width+40), h/(L.height+90)));
+}
 function start(){                                              // čitljiv početak
-  var saved=null; try{ saved=parseFloat(localStorage.getItem('rodoslov.zoom'))||null }catch(e){}
-  setZ(saved || Math.max(.46, Math.min(1, vw()/700)));
+  var saved=null; try{ saved=parseFloat(localStorage.getItem('korijeni.zoom'))||null }catch(e){}
+  if(saved) setZ(saved); else fit();
   setTimeout(function(){
     var el=document.scrollingElement||document.documentElement;
     el.scrollLeft=Math.max(0,(stage.offsetWidth-vw())/2);
@@ -229,6 +233,7 @@ function rel(id){
   return out.join(' · ');
 }
 function openSheet(id){
+  if($('treeview').hidden) go('stablo');
   sel=id; var p=L.P[id], s=$('sheet');
   var ph=photos(p), main=ph[0];
   var yb=Home.year(p.b), yd=Home.year(p.d);
@@ -367,7 +372,7 @@ function go(view){
   $('back').hidden=!tree; $('treetools').hidden=!tree; $('count').hidden=!tree;
   if(location.hash!==(tree?'#stablo':'')) try{ history.replaceState(null,'',tree?'#stablo':location.pathname) }catch(e){}
   if(tree && L) start();
-  if(!tree) renderHome();
+  if(!tree){ closeSheet(); closeForm(); renderHome(); }
   window.scrollTo(0,0);
 }
 function filterSet(){ if(FILTER===null) FILTER=jget(LF,null); return FILTER }
@@ -553,9 +558,9 @@ $('home').addEventListener('click',function(e){
   if(h==='osoba'){ go('stablo'); openSheet(b.dataset.id) }
 });
 $('back').onclick=function(){ go('home') };
-$('zin').onclick=function(){ setZ(z*1.25) };
-$('zout').onclick=function(){ setZ(z/1.25) };
-$('zfit').onclick=fit;
+$('zin').onclick=function(){ zoomByUser=true; setZ(z*1.25) };
+$('zout').onclick=function(){ zoomByUser=true; setZ(z/1.25) };
+$('zfit').onclick=function(){ zoomByUser=true; fit() };
 $('help').onclick=help;
 window.addEventListener('hashchange',function(){ go(location.hash==='#stablo'?'stablo':'home') });
 window.addEventListener('online',push);
