@@ -5,7 +5,7 @@
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
 var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48, VER='1.7', WINDOW=14;
+var CFG=window.CFG||{}, LABEL=48, VER='1.8', WINDOW=14;
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -546,23 +546,48 @@ var IOS=/iphone|ipad|ipod/i.test(UA)||(navigator.platform==='MacIntel'&&navigato
 var AND=/android/i.test(UA);
 var INAPP=/FBAN|FBAV|FB_IAB|Instagram|LinkedIn|Line\/|MicroMessenger|TikTok|Snapchat/i.test(UA)||(AND&&/;\s*wv\)/.test(UA));
 var SAFARI=IOS&&!INAPP&&!/CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA);
+var EDGE=/EdgA\//i.test(UA), SAM=/SamsungBrowser/i.test(UA), OPERA=/OPR\//i.test(UA), FFOX=/Firefox\//i.test(UA);
+var CHROME=AND && /Chrome\//i.test(UA) && !EDGE && !SAM && !OPERA && !FFOX && !INAPP;
+function otherName(){
+  if(INAPP) return 'preglednik WhatsAppa ili Facebooka';
+  if(EDGE) return 'Edge';
+  if(SAM) return 'Samsung Internet';
+  if(OPERA) return 'Opera';
+  if(FFOX) return 'Firefox';
+  return 'ovaj preglednik';
+}
 var standalone=function(){ try{ return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true }catch(e){ return false } };
 function drawWel(){
-  var h='<img class="wellogo" src="icon-192.png" alt="">';
-  if(INSTALL) h+='<h2>Dodaj stablo na ekran</h2><p>Jedan dodir i rodoslov stoji na ekranu kao svaka druga aplikacija.</p>'+
-    '<button class="welbig" data-w="prompt">Instaliraj</button>';
-  else if(IOS&&SAFARI) h+='<h2>Dva koraka do ekrana</h2>'+
-    '<ol class="welsteps"><li>Dolje dodirni <b>Podijeli</b> (kvadratić sa strelicom).</li>'+
-    '<li>Odaberi <b>Dodaj na početni zaslon</b>, pa gore desno <b>Dodaj</b>.</li></ol>'+
-    '<svg class="welar" viewBox="0 0 24 44"><path d="M12 2v34M4 28l8 9 8-9"/></svg>';
-  else if(IOS) h+='<h2>Otvori u Safariju</h2><p>Na iPhoneu samo Safari može staviti stablo na ekran.</p>'+
-    '<button class="welbig" data-w="safari">Otvori u Safariju</button>'+
-    '<p class="hint">Ne otvara se? Dodirni <b>⋯</b> pa <b>Otvori u Safariju</b>.</p>';
-  else if(AND) h+='<h2>Otvori u Chromeu</h2><p>'+(INAPP?'Ovo je preglednik WhatsAppa ili Facebooka — on ne može instalirati.':'U Chromeu dobiješ gumb za instalaciju.')+'</p>'+
-    '<button class="welbig" data-w="chrome">Otvori u Chromeu</button>';
-  else h+='<h2>Dobrodošli</h2><p>Ovo je naše obiteljsko stablo. Dodirni osobu i dopuni svoju granu.</p>'+
-    '<button class="welbig" data-w="later">Uđi</button>';
-  h+='<button class="welghost" data-w="later">Samo pogledaj</button>';
+  var h='<button class="welx" data-w="later" aria-label="Zatvori">&times;</button>'+
+        '<img class="wellogo" src="icon-192.png" alt="">';
+
+  if(AND && !CHROME){                       // Edge, Samsung Internet, WhatsApp … → u Chrome
+    h+='<h2>Otvori u Chromeu</h2>'+
+       '<p>Sad si u '+esc(otherName())+'. Stablo se najbolje instalira iz Chromea — jedan dodir i prebacit ću te.</p>'+
+       '<button class="welbig" data-w="chrome">Otvori u Chromeu</button>'+
+       '<button class="welghost" data-w="copy">Ne otvara se? Kopiraj adresu</button>'+
+       (INSTALL?'<button class="welghost" data-w="prompt">Ipak instaliraj ovdje</button>':'');
+  } else if(INSTALL){                       // pravi Chrome s gumbom
+    h+='<h2>Dodaj stablo na ekran</h2>'+
+       '<p>Jedan dodir i rodoslov stoji na ekranu kao svaka druga aplikacija.</p>'+
+       '<button class="welbig" data-w="prompt">Instaliraj</button>';
+  } else if(IOS&&SAFARI){
+    h+='<h2>Dva koraka do ekrana</h2>'+
+       '<ol class="welsteps"><li>Dolje dodirni <b>Podijeli</b> (kvadratić sa strelicom).</li>'+
+       '<li>Odaberi <b>Dodaj na početni zaslon</b>, pa gore desno <b>Dodaj</b>.</li></ol>'+
+       '<svg class="welar" viewBox="0 0 24 44"><path d="M12 2v34M4 28l8 9 8-9"/></svg>';
+  } else if(IOS){
+    h+='<h2>Otvori u Safariju</h2><p>Na iPhoneu samo Safari može staviti stablo na ekran.</p>'+
+       '<button class="welbig" data-w="safari">Otvori u Safariju</button>'+
+       '<p class="hint">Ne otvara se? Dodirni <b>⋯</b> pa <b>Otvori u Safariju</b>.</p>';
+  } else if(AND){                           // Chrome, ali gumb još nije stigao
+    h+='<h2>Dva koraka do ekrana</h2>'+
+       '<ol class="welsteps"><li>Gore desno dodirni <b>⋮</b>.</li>'+
+       '<li>Odaberi <b>Dodaj na početni zaslon</b> pa <b>Instaliraj</b>.</li></ol>';
+  } else {
+    h+='<h2>Dobrodošli</h2><p>Ovo je naše obiteljsko stablo. Dodirni osobu i dopuni svoju granu.</p>'+
+       '<button class="welbig" data-w="later">Uđi</button>';
+  }
   $('wel').innerHTML='<div class="welin">'+h+'</div>';
 }
 function maybeWel(){
