@@ -5,7 +5,7 @@
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
 var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48, VER='1.6', WINDOW=14;
+var CFG=window.CFG||{}, LABEL=48, VER='1.7', WINDOW=14;
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -340,11 +340,16 @@ function form(title,person,hint,onSave,extra){
   setTimeout(function(){ var e=$('f_n'); if(e&&!person) e.focus() },120);
 }
 function closeForm(){ $('modal').hidden=true; pendingPhotos=[] }
+function plainPhoto(src){            // 'photos/x.jpg' -> 'x', vlastite slike ostaju kakve jesu
+  var m=/^photos\/(.+)\.jpg$/.exec(src||'');
+  return m?m[1]:src;
+}
 function readForm(){
+  var ph=pendingPhotos.map(plainPhoto);
   return {n:($('f_n').value||'').trim(), md:($('f_md').value||'').trim(),
           b:readDate('f_b'), d:readDate('f_x'),
           nt:($('f_t').value||'').trim(),
-          ph:pendingPhotos[0]||null, px:pendingPhotos.slice(1)};
+          ph:ph[0]||null, px:ph.slice(1)};
 }
 function shrink(file,cb){
   var fr=new FileReader();
