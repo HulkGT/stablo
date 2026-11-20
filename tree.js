@@ -3,7 +3,7 @@
 (function(root){
 'use strict';
 
-var CARD = 104, GAPIN = 14, GAPUNIT = 48, ROWGAP = 136;
+var CARD = 104, GAPIN = 14, GAPUNIT = 48, ROWGAP = 156;
 
 function build(data){
   var people = data.people || [], couples = data.couples || [];

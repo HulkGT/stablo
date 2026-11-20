@@ -4,8 +4,8 @@
 'use strict';
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
-var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48, VER='1.8', WINDOW=14;
+var ME=null, FILTER=null, HIDE=null, LH='korijeni.hide';
+var CFG=window.CFG||{}, LABEL=66, VER='1.9', WINDOW=14;
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -162,7 +162,7 @@ function knot(x,y,r,red){
   e.setAttribute('fill',red?'#993720':'#B09B74'); wires.appendChild(e);
 }
 function render(){
-  L=Tree.build(state);
+  L=Tree.build(visible());
   var C=L.CARD, Z=function(v){ return v*z };
   stage.querySelectorAll('.p').forEach(function(e){ e.remove() });
   wires.innerHTML='';
@@ -277,9 +277,9 @@ function openSheet(id){
   var age=(yb&&yd)?('  ·  '+(yd-yb)+' g.'):'';
   var datum=Home.fmt(p.b)+(p.d?' – '+Home.fmt(p.d):(p.b?' –':''));
   s.innerHTML='<div class="grip"><button class="close" data-a="close" aria-label="Zatvori">&times;</button></div><div class="sh">'+
-    '<span class="fr">'+(main?'<img src="'+esc(main)+'" alt="">':'<span class="mono">'+esc(initials(p.n))+'</span>')+'</span>'+
+    '<span class="fr">'+(main?'<img src="'+esc(main)+'" alt="" data-zoom="'+esc(main)+'">':'<span class="mono">'+esc(initials(p.n))+'</span>')+'</span>'+
     '<div><h3>'+esc(nameOf(p))+'</h3><div class="meta">'+esc(datum||'godine nepoznate')+esc(age)+'</div></div></div>'+
-    (ph.length>1?'<div class="gal">'+ph.map(function(x){return '<img src="'+esc(x)+'" alt="">'}).join('')+'</div>':'')+
+    (ph.length>1?'<div class="gal">'+ph.map(function(x){return '<img src="'+esc(x)+'" alt="" data-zoom="'+esc(x)+'">'}).join('')+'</div>':'')+
     (p.nt?'<p class="note">'+esc(p.nt)+'</p>':'')+
     rel(id)+
     (p.by?'<p class="note soft small">upisao/la '+esc(p.by)+'</p>':'')+
@@ -411,6 +411,7 @@ function editPerson(id){
 
 /* ---------- navigacija: tipka natrag ide korak po korak ---------- */
 function uiDepth(){
+  if(!$('lb').hidden) return 3;
   if(!$('sheet').hidden || !$('modal').hidden) return 2;
   if(!$('treeview').hidden) return 1;
   return 0;
@@ -423,6 +424,7 @@ function syncHist(){
   }
 }
 function closeTopNow(){
+  if(!$('lb').hidden){ $('lb').hidden=true; return }
   if(!$('modal').hidden){ closeForm(); renderHome(); return }
   if(!$('sheet').hidden){ closeSheet(); return }
   if(!$('treeview').hidden){ go('home',true); return }
@@ -449,11 +451,24 @@ function go(view,silent){
   try{ if(tree ? location.hash!=='#stablo' : location.hash) history.replaceState(history.state,'',want) }catch(e){}
   window.scrollTo(0,0);
 }
+function hideSet(){ if(HIDE===null) HIDE=jget(LH,[])||[]; return HIDE }
+function visible(){                     // obitelji koje je korisnik sakrio na ovom mobitelu
+  var H=hideSet(); if(!H.length) return state;
+  var gone={};
+  state.people.forEach(function(p){ if(H.indexOf(Home.surname(p.n))>=0) gone[p.id]=1 });
+  // tko se samo priženio/udao u skrivenu obitelj, nestaje s njom
+  state.people.forEach(function(p){
+    if(gone[p.id] || p.pc) return;
+    var cs=state.couples.filter(function(c){ return c.a===p.id||c.b===p.id });
+    if(cs.length && cs.every(function(c){ var o=c.a===p.id?c.b:c.a; return !o||gone[o] })) gone[p.id]=1;
+  });
+  return {people:state.people.filter(function(p){ return !gone[p.id] }), couples:state.couples};
+}
 function filterSet(){ if(FILTER===null) FILTER=jget(LF,null); return FILTER }
 function renderHome(){
   if(!L) return;
   var el=$('home'); if(!el) return;
-  var B=Home.birthdays(state.people, filterSet(), new Date(), WINDOW);
+  var B=Home.birthdays(visible().people, filterSet(), new Date(), WINDOW);
   var ed=Home.editors(state.people);
   var h='';
   if(B.length){
@@ -508,10 +523,18 @@ function askName(first){
   setTimeout(function(){ var e=$('f_me'); if(e) e.focus() },150);
 }
 function askFilter(){
-  var all=Home.surnames(state.people), cur=filterSet();
+  var all=Home.surnames(state.people), cur=filterSet(), hid=hideSet();
   var m=$('modal');
-  m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>Čije rođendane želiš vidjeti</h4>'+
-    '<p class="hint">Bez odabira vidiš sve. Odaberi prezimena koja te zanimaju — vrijedi samo za ovaj mobitel.</p>'+
+  m.innerHTML='<div class="grip"><button class="close" data-a="cancel" aria-label="Zatvori">&times;</button></div><h4>Postavke</h4>'+
+    '<p class="hint">Vrijedi samo za ovaj mobitel. Drugi i dalje vide sve.</p>'+
+    '<div class="sec">Obitelji u stablu</div>'+
+    '<p class="hint">Isključi obitelji koje ne želiš vidjeti u stablu.</p>'+
+    '<div class="who pick">'+all.map(function(x){
+      var off=hid.indexOf(x)>=0;
+      return '<button class="chip'+(off?' off':' on')+'" data-a="hid" data-s="'+esc(x)+'">'+(off?'':'✓ ')+esc(x)+'</button>';
+    }).join('')+'</div>'+
+    '<div class="sec">Rođendani</div>'+
+    '<p class="hint">Bez odabira vidiš sve. Odaberi prezimena čije rođendane želiš.</p>'+
     '<div class="who pick">'+all.map(function(x){
       var on=cur&&cur.indexOf(x)>=0;
       return '<button class="chip'+(on?' on':'')+'" data-a="tog" data-s="'+esc(x)+'">'+esc(x)+'</button>';
@@ -626,7 +649,12 @@ $('modal').addEventListener('click',function(e){
     if(i<0) cur.push(sn); else cur.splice(i,1);
     FILTER=cur.length?cur:null; jset(LF,FILTER); askFilter(); renderHome(); return;
   }
-  if(a==='allf'){ FILTER=null; jset(LF,null); askFilter(); renderHome(); return }
+  if(a==='hid'){
+    var hs=b.dataset.s, hh=hideSet().slice(), j=hh.indexOf(hs);
+    if(j<0) hh.push(hs); else hh.splice(j,1);
+    HIDE=hh; jset(LH,HIDE); render(); askFilter(); return;
+  }
+  if(a==='allf'){ FILTER=null; jset(LF,null); HIDE=[]; jset(LH,[]); render(); askFilter(); return }
   if(a==='pick') return $('f_f').click();
   if(a==='rmph'){ pendingPhotos.splice(+b.dataset.i,1); $('f_phs').innerHTML=photoStrip(); return }
   if(a==='save'){ var v=readForm(), f=m._save; if(f){ var r=f(v); if(r!==false) closeTop(); } return }
@@ -680,6 +708,14 @@ $('zin').onclick=function(){ zoomByUser=true; setZ(z*1.25) };
 $('zout').onclick=function(){ zoomByUser=true; setZ(z/1.25) };
 $('zfit').onclick=function(){ zoomByUser=true; fit() };
 $('help').onclick=help;
+$('set').onclick=askFilter;
+$('sheet').addEventListener('click',function(e){
+  var im=e.target.closest('[data-zoom]'); if(!im) return;
+  e.stopPropagation();
+  $('lb').innerHTML='<img src="'+esc(im.dataset.zoom)+'" alt="">';
+  $('lb').hidden=false; syncHist();
+},true);
+$('lb').addEventListener('click',function(){ closeTop() });
 window.addEventListener('online',push);
 document.addEventListener('visibilitychange',function(){ if(!document.hidden){ pull(); push() } });
 
