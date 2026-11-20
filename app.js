@@ -5,7 +5,7 @@
 
 var LS='rodoslov.doc', LQ='rodoslov.queue', LW='rodoslov.welcome', LM='korijeni.me', LF='korijeni.filter';
 var ME=null, FILTER=null;
-var CFG=window.CFG||{}, LABEL=48, VER='1.5';
+var CFG=window.CFG||{}, LABEL=48, VER='1.6', WINDOW=14;
 var state={people:[],couples:[]}, L=null, z=1, sel=null, stamp=null, busy=false, empty=false, fresh={};
 
 var $=function(id){return document.getElementById(id)};
@@ -290,7 +290,7 @@ function openSheet(id){
       '<button class="btn" data-a="edit">Uredi</button>'+
       '<button class="btn quiet full" data-a="close">Zatvori</button>'+
     '</div>';
-  s.hidden=false; syncOverlay();
+  s.hidden=false; syncOverlay(); syncHist();
 }
 function closeSheet(){ $('sheet').hidden=true; sel=null }
 
@@ -335,7 +335,7 @@ function form(title,person,hint,onSave,extra){
     '<div class="acts"><button class="btn primary full" data-a="save">Spremi</button>'+
     (extra||'')+
     '<button class="btn quiet full" data-a="cancel">Odustani</button></div>';
-  m.hidden=false; syncOverlay();
+  m.hidden=false; syncOverlay(); syncHist();
   m._save=onSave;
   setTimeout(function(){ var e=$('f_n'); if(e&&!person) e.focus() },120);
 }
@@ -404,21 +404,51 @@ function editPerson(id){
   },'<button class="btn full" data-a="del">Obriši osobu</button>');
 }
 
+/* ---------- navigacija: tipka natrag ide korak po korak ---------- */
+function uiDepth(){
+  if(!$('sheet').hidden || !$('modal').hidden) return 2;
+  if(!$('treeview').hidden) return 1;
+  return 0;
+}
+var pushed=0, skipPop=0;
+function syncHist(){
+  var n=uiDepth(), guard=0;
+  while(pushed<n && guard++<4){
+    try{ history.pushState({kor:pushed+1},''); pushed++ }catch(e){ pushed=n; break }
+  }
+}
+function closeTopNow(){
+  if(!$('modal').hidden){ closeForm(); renderHome(); return }
+  if(!$('sheet').hidden){ closeSheet(); return }
+  if(!$('treeview').hidden){ go('home',true); return }
+}
+function closeTop(){
+  closeTopNow();
+  if(pushed>0){ skipPop++; pushed--; try{ history.back() }catch(e){} }
+}
+window.addEventListener('popstate',function(){
+  if(skipPop>0){ skipPop--; return }
+  closeTopNow();
+  pushed=uiDepth();
+});
+
 /* ---------- početni zaslon ---------- */
-function go(view){
+function go(view,silent){
   var tree = view==='stablo';
   $('home').hidden=tree; $('treeview').hidden=!tree;
   $('back').hidden=!tree; $('treetools').hidden=!tree; $('count').hidden=!tree;
-  if(location.hash!==(tree?'#stablo':'')) try{ history.replaceState(null,'',tree?'#stablo':location.pathname) }catch(e){}
+  var want = tree ? '#stablo' : location.pathname+location.search;
   if(tree && L) start();
   if(!tree){ closeSheet(); closeForm(); renderHome(); }
+  if(!silent){ syncHist(); }
+  try{ if(tree ? location.hash!=='#stablo' : location.hash) history.replaceState(history.state,'',want) }catch(e){}
   window.scrollTo(0,0);
 }
 function filterSet(){ if(FILTER===null) FILTER=jget(LF,null); return FILTER }
 function renderHome(){
   if(!L) return;
   var el=$('home'); if(!el) return;
-  var B=Home.birthdays(state.people, filterSet(), new Date());
+  var B=Home.birthdays(state.people, filterSet(), new Date(), WINDOW);
   var ed=Home.editors(state.people);
   var h='';
   if(B.length){
@@ -429,14 +459,20 @@ function renderHome(){
       '<div class="n">'+esc(nameOf(n.p))+'</div>'+
       '<div class="d">puni '+n.turns+' · '+esc(Home.fmt(n.p.b))+'</div></div></button>';
   } else {
-    h+='<div class="big empty"><div><div class="n">Još nema rođendana</div>'+
-       '<div class="d">Upiši dan i mjesec kod osoba i ovdje će se pojaviti.</div></div></div>';
+    var anyDate=state.people.some(function(p){ var q=Home.parts(p.b); return !p.d && q && q.m && q.d });
+    h+='<div class="big empty"><div>'+
+       (anyDate
+         ? '<div class="n">Nema rođendana u sljedeća dva tjedna</div>'+
+           '<div class="d">Javit će se ovdje dva tjedna prije.</div>'
+         : '<div class="n">Još nema rođendana</div>'+
+           '<div class="d">Upiši dan i mjesec kod osoba i ovdje će se pojaviti.</div>')+
+       '</div></div>';
   }
   h+='<button class="cta" data-h="stablo">Otvori stablo</button>'+
      '<div class="statline">'+state.people.length+' osoba · '+L.gens+' koljena</div>';
   if(B.length>1){
-    h+='<div class="sec">Dalje u godini<button class="lnk" data-h="filter">Postavke</button></div><div class="rowlist">';
-    B.slice(1,6).forEach(function(b){
+    h+='<div class="sec">Uskoro<button class="lnk" data-h="filter">Postavke</button></div><div class="rowlist">';
+    B.slice(1,8).forEach(function(b){
       var s2=photos(b.p)[0];
       h+='<button class="row" data-h="osoba" data-id="'+b.p.id+'">'+
         (s2?'<img src="'+esc(s2)+'" alt="">':'<span class="rmono">'+esc(initials(b.p.n))+'</span>')+
@@ -444,9 +480,9 @@ function renderHome(){
         '<span class="dt">'+esc(Home.short(b.p.b))+' · '+b.turns+'</span></button>';
     });
     h+='</div>';
-  } else if(B.length===1){
+  } else {
     h+='<div class="sec">Rođendani<button class="lnk" data-h="filter">Postavke</button></div>'+
-       '<p class="soft small">Još nema drugih upisanih datuma.</p>';
+       '<p class="soft small">Prikazuju se dva tjedna unaprijed, samo za žive.</p>';
   }
   h+='<div class="sec">Tko upisuje</div><div class="who">';
   if(ed.length) ed.forEach(function(e){ h+='<span class="chip'+(e.name===ME?' me':'')+'">'+esc(e.name)+'</span>' });
@@ -463,7 +499,7 @@ function askName(first){
     '<label>Tvoje ime<input type="text" id="f_me" value="'+esc(ME||'')+'" autocomplete="given-name"></label>'+
     '<div class="acts"><button class="btn primary full" data-a="saveme">Spremi</button>'+
     '<button class="btn quiet full" data-a="cancel">'+(first?'Preskoči':'Odustani')+'</button></div>';
-  m.hidden=false; syncOverlay(); m._save=null;
+  m.hidden=false; syncOverlay(); m._save=null; syncHist();
   setTimeout(function(){ var e=$('f_me'); if(e) e.focus() },150);
 }
 function askFilter(){
@@ -477,7 +513,7 @@ function askFilter(){
     }).join('')+'</div>'+
     '<div class="acts"><button class="btn full" data-a="allf">Pokaži sve</button>'+
     '<button class="btn primary full" data-a="cancel">Gotovo</button></div>';
-  m.hidden=false; syncOverlay(); m._save=null;
+  m.hidden=false; syncOverlay(); m._save=null; syncHist();
 }
 
 /* ---------- pomoć ---------- */
@@ -539,7 +575,7 @@ stage.addEventListener('click',function(e){
 $('sheet').addEventListener('click',function(e){
   var b=e.target.closest('[data-a]'); if(!b) return;
   var a=b.dataset.a, id=sel;
-  if(a==='close') return closeSheet();
+  if(a==='close') return closeTop();
   closeSheet();
   if(a==='partner') addPartner(id);
   if(a==='child') addChild(id);
@@ -549,11 +585,11 @@ $('sheet').addEventListener('click',function(e){
 $('modal').addEventListener('click',function(e){
   var b=e.target.closest('[data-a]'); if(!b) return;
   var a=b.dataset.a, m=$('modal');
-  if(a==='cancel'){ closeForm(); renderHome(); return }
+  if(a==='cancel'){ closeTop(); return }
   if(a==='saveme'){
     var v=($('f_me').value||'').trim();
     if(v){ ME=v; try{ localStorage.setItem(LM,v) }catch(x){} }
-    closeForm(); renderHome(); return;
+    closeTop(); return;
   }
   if(a==='tog'){
     var sn=b.dataset.s, cur=(filterSet()||[]).slice(), i=cur.indexOf(sn);
@@ -563,7 +599,7 @@ $('modal').addEventListener('click',function(e){
   if(a==='allf'){ FILTER=null; jset(LF,null); askFilter(); renderHome(); return }
   if(a==='pick') return $('f_f').click();
   if(a==='rmph'){ pendingPhotos.splice(+b.dataset.i,1); $('f_phs').innerHTML=photoStrip(); return }
-  if(a==='save'){ var v=readForm(), f=m._save; if(f){ var r=f(v); if(r!==false) closeForm(); } return }
+  if(a==='save'){ var v=readForm(), f=m._save; if(f){ var r=f(v); if(r!==false) closeTop(); } return }
   if(a==='del'){
     var who=editing||sel; if(!who) return;
     var nm=L.P[who]?nameOf(L.P[who]):'';
@@ -577,7 +613,7 @@ $('modal').addEventListener('click',function(e){
   if(a==='delyes'){
     var w2=editing||sel; editing=null;
     if(w2) doOp({t:'d',id:w2},'Obrisano');
-    closeForm(); return;
+    closeTop(); return;
   }
 });
 document.addEventListener('change',function(e){
@@ -609,12 +645,11 @@ $('home').addEventListener('click',function(e){
   if(h==='filter') return askFilter();
   if(h==='osoba'){ go('stablo'); openSheet(b.dataset.id) }
 });
-$('back').onclick=function(){ go('home') };
+$('back').onclick=function(){ closeTop() };
 $('zin').onclick=function(){ zoomByUser=true; setZ(z*1.25) };
 $('zout').onclick=function(){ zoomByUser=true; setZ(z/1.25) };
 $('zfit').onclick=function(){ zoomByUser=true; fit() };
 $('help').onclick=help;
-window.addEventListener('hashchange',function(){ go(location.hash==='#stablo'?'stablo':'home') });
 window.addEventListener('online',push);
 document.addEventListener('visibilitychange',function(){ if(!document.hidden){ pull(); push() } });
 

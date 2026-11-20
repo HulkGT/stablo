@@ -38,8 +38,9 @@ function display(p){                   // 'Anka Jozić (r. Čalušić)'
 }
 
 /* Sljedeći rođendani živih osoba, s punim datumom */
-function birthdays(people, filter, today){
+function birthdays(people, filter, today, maxDays){
   var now=today||new Date();
+  var lim=(maxDays==null)?9999:maxDays;
   var t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   var out=[];
   people.forEach(function(p){
@@ -49,6 +50,7 @@ function birthdays(people, filter, today){
     var y=t0.getFullYear(), next=new Date(y,b.m-1,b.d);
     if(next<t0) next=new Date(y+1,b.m-1,b.d);
     var days=Math.round((next-t0)/86400000);
+    if(days>lim) return;
     out.push({p:p, days:days, when:next, turns:next.getFullYear()-b.y});
   });
   out.sort(function(a,b){ return a.days-b.days });
